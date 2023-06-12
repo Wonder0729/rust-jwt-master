@@ -1,6 +1,7 @@
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use std::{thread, time};
 
 #[derive(Deserialize, Serialize, Debug)]
 struct Claims {
@@ -14,7 +15,7 @@ fn main() {
     let key = b"secret";
     let my_iat = Utc::now().timestamp();
     let my_exp = Utc::now()
-        .checked_add_signed(Duration::seconds(5))
+        .checked_add_signed(Duration::seconds(3))
         .expect("invalid timestamp")
         .timestamp();
 
@@ -36,12 +37,22 @@ fn main() {
 
     println!("token: {:?}", token);
 
+//    println!("please wait for 6 seconds");
+//    thread::sleep(time::Duration::from_secs(6));
+    let validator = Validation {
+        sub: Some("a@d.com".to_owned()),
+        ..Validation::default()
+    };
+    
+    print!("{}", Utc::now().timestamp());
     let token_data = match decode::<Claims>(
         &token,
         &DecodingKey::from_secret(key),
-        &Validation::default(),
+        &validator,
     ) {
-        Ok(c) => c,
+        Ok(c) => {
+            c
+        },
         Err(err) => {
             println!("err: {:?}", err.kind());
             panic!()
