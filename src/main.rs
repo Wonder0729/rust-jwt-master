@@ -35,4 +35,18 @@ fn main() {
     };
 
     println!("token: {:?}", token);
+
+    let token_data = match decode::<Claims>(
+        &token,
+        &DecodingKey::from_secret(key),
+        &Validation::default(),
+    ) {
+        Ok(c) => c,
+        Err(err) => {
+            println!("err: {:?}", err.kind());
+            panic!()
+        }
+    };
+
+    println!("token data: {:?}", token_data);
 }
